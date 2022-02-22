@@ -7,9 +7,7 @@ interface CreatePostResponse {
   data: {
     createPublicationStory: {
       success: boolean
-      post?: {
-        _id: string
-      }
+      post?: PostResponse
     }
   }
 }
@@ -18,11 +16,22 @@ interface UpdatePostResponse {
   data: {
     updateStory: {
       success: boolean
-      post?: {
-        _id: string
-      }
+      post?: PostResponse
     }
   }
+}
+
+interface PostResponse {
+  _id: string
+  slug: string
+  publication: {
+    domain: string
+  }
+}
+
+interface PostProperties {
+  id: string
+  url: string
 }
 
 interface PostOptions {
@@ -32,11 +41,19 @@ interface PostOptions {
   originalUrl: string
 }
 
+function getPostData(data: PostResponse): PostProperties {
+  if (!data) throw new Error('Response has no post data')
+  return {
+    id: data._id,
+    url: `https://${data.publication.domain}/${data.slug}`
+  }
+}
+
 async function createPost(
   client: GraphQLClient,
   publicationId: string,
   options: PostOptions
-): Promise<string | undefined> {
+): Promise<PostProperties | undefined> {
   const { title, body, image, originalUrl } = options
   const inputObj = {
     title,
@@ -64,9 +81,10 @@ async function createPost(
   }
 
   const response = await client.request<CreatePostResponse>(query, variables)
-  if (!response.data.createPublicationStory.success)
+  const postData = response.data.createPublicationStory.post
+  if (!response.data.createPublicationStory.success || !postData)
     throw new Error('Failed to create post: unsuccessful')
-  return response.data.createPublicationStory.post?._id
+  return getPostData(postData)
 }
 
 async function updatePost(
@@ -74,7 +92,7 @@ async function updatePost(
   existingId: string,
   publicationId: string,
   options: PostOptions
-): Promise<string | undefined> {
+): Promise<PostProperties | undefined> {
   const { title, body, image, originalUrl } = options
   const inputObj = {
     title,
@@ -106,9 +124,10 @@ async function updatePost(
   }
 
   const response = await client.request<UpdatePostResponse>(query, variables)
-  if (!response.data.updateStory.success)
+  const postData = response.data.updateStory.post
+  if (!response.data.updateStory.success || !postData)
     throw new Error('Failed to update post: unsuccessful')
-  return response.data.updateStory.post?._id
+  return getPostData(postData)
 }
 
 async function run(): Promise<void> {
@@ -137,13 +156,21 @@ async function run(): Promise<void> {
       body,
       originalUrl
     }
-    let postId = ''
     if (existingId) {
-      postId = (await updatePost(client, existingId, publicationId, post)) ?? ''
+      const response = await updatePost(client, existingId, publicationId, post)
+      if (!response) {
+        core.setFailed('Bad response from Hashnode')
+        process.exit(1)
+      }
     } else {
-      postId = (await createPost(client, publicationId, post)) ?? ''
+      const response = await createPost(client, publicationId, post)
+      if (!response) {
+        core.setFailed('Bad response from Hashnode')
+        process.exit(1)
+      }
+      core.setOutput('id', response.id)
+      core.setOutput('url', response.id)
     }
-    core.setOutput('id', postId)
   } catch (e) {
     // eslint-disable-next-line no-console
     console.debug(e)

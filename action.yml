@@ -1,11 +1,46 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'Hashnode Publisher'
+description: 'Create a new post or update an existing post through the Hashnode API'
+author: 'Nevulo'
+
+outputs:
+  id:
+    description: The ID of the new or updated post.
+  url:
+    description: The URL of the new or updated post.
+
 inputs:
-  milliseconds: # change this
+  publication_id:
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+    description: 'The ID of the publication to publish the post to'
+
+  id:
+    required: false
+    description: 'If you want to update an existing post, the ID for a post'
+
+  title:
+    required: true
+    description: 'Title of the post'
+
+  main_image:
+    required: false
+    description: 'The main image for the post'
+
+  original_url:
+    required: false
+    description: 'The canonical URL (original location) for the post if applicable'
+
+  body:
+    required: true
+    description: 'The body of the post, can include Markdown'
+
+  api_key:
+    required: true
+    description: "The Hashnode API key to publish the post using"
+  
 runs:
-  using: 'node12'
+  using: 'node16'
   main: 'dist/index.js'
+
+branding:
+  color: purple
+  icon: book-open

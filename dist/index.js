@@ -38,8 +38,15 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const graphql_request_1 = __nccwpck_require__(2476);
 const endpoint = 'https://api.hashnode.com';
+function getPostData(data) {
+    if (!data)
+        throw new Error('Response has no post data');
+    return {
+        id: data._id,
+        url: `https://${data.publication.domain}/${data.slug}`
+    };
+}
 function createPost(client, publicationId, options) {
-    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const { title, body, image, originalUrl } = options;
         const inputObj = {
@@ -66,13 +73,13 @@ function createPost(client, publicationId, options) {
             input: inputObj
         };
         const response = yield client.request(query, variables);
-        if (!response.data.createPublicationStory.success)
+        const postData = response.data.createPublicationStory.post;
+        if (!response.data.createPublicationStory.success || !postData)
             throw new Error('Failed to create post: unsuccessful');
-        return (_a = response.data.createPublicationStory.post) === null || _a === void 0 ? void 0 : _a._id;
+        return getPostData(postData);
     });
 }
 function updatePost(client, existingId, publicationId, options) {
-    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const { title, body, image, originalUrl } = options;
         const inputObj = {
@@ -103,13 +110,13 @@ function updatePost(client, existingId, publicationId, options) {
             input: inputObj
         };
         const response = yield client.request(query, variables);
-        if (!response.data.updateStory.success)
+        const postData = response.data.updateStory.post;
+        if (!response.data.updateStory.success || !postData)
             throw new Error('Failed to update post: unsuccessful');
-        return (_a = response.data.updateStory.post) === null || _a === void 0 ? void 0 : _a._id;
+        return getPostData(postData);
     });
 }
 function run() {
-    var _a, _b;
     return __awaiter(this, void 0, void 0, function* () {
         const apiKey = core.getInput('api_key', { required: true });
         const publicationId = core.getInput('publication_id', { required: true });
@@ -134,14 +141,22 @@ function run() {
                 body,
                 originalUrl
             };
-            let postId = '';
             if (existingId) {
-                postId = (_a = (yield updatePost(client, existingId, publicationId, post))) !== null && _a !== void 0 ? _a : '';
+                const response = yield updatePost(client, existingId, publicationId, post);
+                if (!response) {
+                    core.setFailed('Bad response from Hashnode');
+                    process.exit(1);
+                }
             }
             else {
-                postId = (_b = (yield createPost(client, publicationId, post))) !== null && _b !== void 0 ? _b : '';
+                const response = yield createPost(client, publicationId, post);
+                if (!response) {
+                    core.setFailed('Bad response from Hashnode');
+                    process.exit(1);
+                }
+                core.setOutput('id', response.id);
+                core.setOutput('url', response.id);
             }
-            core.setOutput('id', postId);
         }
         catch (e) {
             // eslint-disable-next-line no-console

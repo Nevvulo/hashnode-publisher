@@ -55,7 +55,7 @@ async function createPost(
   options: PostOptions
 ): Promise<PostProperties | undefined> {
   const { title, body, image, originalUrl } = options
-  const inputObj = {
+  const input = {
     title,
     contentMarkdown: body,
     coverImageURL: image,
@@ -65,8 +65,8 @@ async function createPost(
     tags: [] // TODO: how to support tags? needs _id
   }
   const query = gql`
-    mutation CreatePublicationStory {
-      createPublicationStory(publicationId: $publicationid, input: $input) {
+    mutation createPublicationStory {
+      createPublicationStory(publicationId: $publicationId, input: $input) {
         success
         post {
           _id
@@ -76,8 +76,8 @@ async function createPost(
   `
 
   const variables = {
-    publicationid: publicationId,
-    input: inputObj
+    publicationId,
+    input
   }
 
   const response = await client.request<CreatePostResponse>(query, variables)
@@ -107,8 +107,8 @@ async function updatePost(
     tags: [] // TODO: how to support tags? needs _id
   }
   const query = gql`
-    mutation UpdateStory {
-      updateStory(postId: $postid, input: $input) {
+    mutation updateStory {
+      updateStory(postId: $postId, input: $input) {
         success
         post {
           _id
@@ -118,8 +118,7 @@ async function updatePost(
   `
 
   const variables = {
-    postid: existingId,
-    publicationid: publicationId,
+    postId: existingId,
     input: inputObj
   }
 

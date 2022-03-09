@@ -73,6 +73,10 @@ async function createPost(
         success
         post {
           _id
+          slug
+          publication {
+            domain
+          }
         }
       }
     }
@@ -84,6 +88,8 @@ async function createPost(
   }
 
   const response = await client.request<CreatePostResponse>(query, variables)
+  core.debug(JSON.stringify(response))
+  if (!response.data) throw new Error('Failed to create post: no data')
   const postData = response.data.createPublicationStory.post
   if (!response.data.createPublicationStory.success || !postData)
     throw new Error('Failed to create post: unsuccessful')
@@ -115,6 +121,10 @@ async function updatePost(
         success
         post {
           _id
+          slug
+          publication {
+            domain
+          }
         }
       }
     }
@@ -174,8 +184,7 @@ async function run(): Promise<void> {
       core.setOutput('url', response.id)
     }
   } catch (e) {
-    // eslint-disable-next-line no-console
-    console.debug(e)
+    core.debug(`${e}`)
     core.setFailed('Invalid API key provided (or some other error occured)')
     process.exit(1)
   }

@@ -67,6 +67,10 @@ function createPost(client, publicationId, options) {
         success
         post {
           _id
+          slug
+          publication {
+            domain
+          }
         }
       }
     }
@@ -76,6 +80,9 @@ function createPost(client, publicationId, options) {
             input
         };
         const response = yield client.request(query, variables);
+        core.debug(JSON.stringify(response));
+        if (!response.data)
+            throw new Error('Failed to create post: no data');
         const postData = response.data.createPublicationStory.post;
         if (!response.data.createPublicationStory.success || !postData)
             throw new Error('Failed to create post: unsuccessful');
@@ -103,6 +110,10 @@ function updatePost(client, existingId, publicationId, options) {
         success
         post {
           _id
+          slug
+          publication {
+            domain
+          }
         }
       }
     }
@@ -161,8 +172,7 @@ function run() {
             }
         }
         catch (e) {
-            // eslint-disable-next-line no-console
-            console.debug(e);
+            core.debug(`${e}`);
             core.setFailed('Invalid API key provided (or some other error occured)');
             process.exit(1);
         }

@@ -4,20 +4,16 @@ import { GraphQLClient, gql } from 'graphql-request'
 const endpoint = 'https://api.hashnode.com'
 
 interface CreatePostResponse {
-  data: {
-    createPublicationStory: {
-      success: boolean
-      post?: PostResponse
-    }
+  createPublicationStory: {
+    success: boolean
+    post?: PostResponse
   }
 }
 
 interface UpdatePostResponse {
-  data: {
-    updateStory: {
-      success: boolean
-      post?: PostResponse
-    }
+  updateStory: {
+    success: boolean
+    post?: PostResponse
   }
 }
 
@@ -45,7 +41,10 @@ function getPostData(data: PostResponse): PostProperties {
   if (!data) throw new Error('Response has no post data')
   return {
     id: data._id,
-    url: `https://${data.publication.domain}/${data.slug}`
+    // TODO: temporary
+    url: `https://${data.publication.domain || 'hashnode.nevulo.xyz'}/${
+      data.slug
+    }`
   }
 }
 
@@ -89,9 +88,9 @@ async function createPost(
 
   const response = await client.request<CreatePostResponse>(query, variables)
   core.debug(JSON.stringify(response))
-  if (!response.data) throw new Error('Failed to create post: no data')
-  const postData = response.data.createPublicationStory.post
-  if (!response.data.createPublicationStory.success || !postData)
+  if (!response) throw new Error('Failed to create post: no data')
+  const postData = response.createPublicationStory.post
+  if (!response.createPublicationStory.success || !postData)
     throw new Error('Failed to create post: unsuccessful')
   return getPostData(postData)
 }
@@ -136,8 +135,8 @@ async function updatePost(
   }
 
   const response = await client.request<UpdatePostResponse>(query, variables)
-  const postData = response.data.updateStory.post
-  if (!response.data.updateStory.success || !postData)
+  const postData = response.updateStory.post
+  if (!response.updateStory.success || !postData)
     throw new Error('Failed to update post: unsuccessful')
   return getPostData(postData)
 }

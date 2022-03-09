@@ -43,7 +43,8 @@ function getPostData(data) {
         throw new Error('Response has no post data');
     return {
         id: data._id,
-        url: `https://${data.publication.domain}/${data.slug}`
+        // TODO: temporary
+        url: `https://${data.publication.domain || 'hashnode.nevulo.xyz'}/${data.slug}`
     };
 }
 function createPost(client, publicationId, options) {
@@ -81,10 +82,10 @@ function createPost(client, publicationId, options) {
         };
         const response = yield client.request(query, variables);
         core.debug(JSON.stringify(response));
-        if (!response.data)
+        if (!response)
             throw new Error('Failed to create post: no data');
-        const postData = response.data.createPublicationStory.post;
-        if (!response.data.createPublicationStory.success || !postData)
+        const postData = response.createPublicationStory.post;
+        if (!response.createPublicationStory.success || !postData)
             throw new Error('Failed to create post: unsuccessful');
         return getPostData(postData);
     });
@@ -123,8 +124,8 @@ function updatePost(client, existingId, publicationId, options) {
             input: inputObj
         };
         const response = yield client.request(query, variables);
-        const postData = response.data.updateStory.post;
-        if (!response.data.updateStory.success || !postData)
+        const postData = response.updateStory.post;
+        if (!response.updateStory.success || !postData)
             throw new Error('Failed to update post: unsuccessful');
         return getPostData(postData);
     });

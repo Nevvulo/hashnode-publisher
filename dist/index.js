@@ -169,7 +169,7 @@ function run() {
                     process.exit(1);
                 }
                 core.setOutput('id', response.id);
-                core.setOutput('url', response.id);
+                core.setOutput('url', response.url);
             }
         }
         catch (e) {

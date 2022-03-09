@@ -1,8 +1,8 @@
 {
-  "name": "typescript-action",
-  "version": "0.0.0",
+  "name": "hashnode-publisher",
+  "version": "1.0.1",
   "private": true,
-  "description": "TypeScript template action",
+  "description": "Hashnode publisher",
   "main": "lib/main.js",
   "scripts": {
     "build": "tsc",

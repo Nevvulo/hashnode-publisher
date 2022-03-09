@@ -49,7 +49,7 @@ function getPostData(data) {
 function createPost(client, publicationId, options) {
     return __awaiter(this, void 0, void 0, function* () {
         const { title, body, image, originalUrl } = options;
-        const inputObj = {
+        const input = {
             title,
             contentMarkdown: body,
             coverImageURL: image,
@@ -59,8 +59,8 @@ function createPost(client, publicationId, options) {
             tags: [] // TODO: how to support tags? needs _id
         };
         const query = (0, graphql_request_1.gql) `
-    mutation CreatePublicationStory {
-      createPublicationStory(publicationId: $publicationid, input: $input) {
+    mutation createPublicationStory {
+      createPublicationStory(publicationId: $publicationId, input: $input) {
         success
         post {
           _id
@@ -69,8 +69,8 @@ function createPost(client, publicationId, options) {
     }
   `;
         const variables = {
-            publicationid: publicationId,
-            input: inputObj
+            publicationId,
+            input
         };
         const response = yield client.request(query, variables);
         const postData = response.data.createPublicationStory.post;
@@ -95,8 +95,8 @@ function updatePost(client, existingId, publicationId, options) {
             tags: [] // TODO: how to support tags? needs _id
         };
         const query = (0, graphql_request_1.gql) `
-    mutation UpdateStory {
-      updateStory(postId: $postid, input: $input) {
+    mutation updateStory {
+      updateStory(postId: $postId, input: $input) {
         success
         post {
           _id
@@ -105,8 +105,7 @@ function updatePost(client, existingId, publicationId, options) {
     }
   `;
         const variables = {
-            postid: existingId,
-            publicationid: publicationId,
+            postId: existingId,
             input: inputObj
         };
         const response = yield client.request(query, variables);

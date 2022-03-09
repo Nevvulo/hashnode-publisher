@@ -65,7 +65,10 @@ async function createPost(
     tags: [] // TODO: how to support tags? needs _id
   }
   const query = gql`
-    mutation createPublicationStory {
+    mutation createPublicationStory(
+      $publicationId: String!
+      $input: CreateStoryInput!
+    ) {
       createPublicationStory(publicationId: $publicationId, input: $input) {
         success
         post {
@@ -107,7 +110,7 @@ async function updatePost(
     tags: [] // TODO: how to support tags? needs _id
   }
   const query = gql`
-    mutation updateStory {
+    mutation updateStory($postId: String!, $input: UpdateStoryInput!) {
       updateStory(postId: $postId, input: $input) {
         success
         post {

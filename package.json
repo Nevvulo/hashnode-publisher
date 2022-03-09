@@ -1,6 +1,6 @@
 {
   "name": "hashnode-publisher",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "description": "Hashnode publisher",
   "main": "lib/main.js",

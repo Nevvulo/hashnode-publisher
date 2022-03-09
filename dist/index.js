@@ -59,7 +59,10 @@ function createPost(client, publicationId, options) {
             tags: [] // TODO: how to support tags? needs _id
         };
         const query = (0, graphql_request_1.gql) `
-    mutation createPublicationStory {
+    mutation createPublicationStory(
+      $publicationId: String!
+      $input: CreateStoryInput!
+    ) {
       createPublicationStory(publicationId: $publicationId, input: $input) {
         success
         post {
@@ -95,7 +98,7 @@ function updatePost(client, existingId, publicationId, options) {
             tags: [] // TODO: how to support tags? needs _id
         };
         const query = (0, graphql_request_1.gql) `
-    mutation updateStory {
+    mutation updateStory($postId: String!, $input: UpdateStoryInput!) {
       updateStory(postId: $postId, input: $input) {
         success
         post {
